@@ -1,2 +1,5 @@
 # wch-flux-sdk
-SDK for the React and Vue.js SPAs.
+IBM Watson Content Hub SDK for the React and Vue.js SPAs.
+
+# License
+See the included license file [License](license.txt).
