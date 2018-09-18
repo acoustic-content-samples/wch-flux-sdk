@@ -1,0 +1,6 @@
+/node_modules
+/src
+.wchtoolsoptions.json
+wchtools-*.*
+*.conflict
+.wchtoolshashes
