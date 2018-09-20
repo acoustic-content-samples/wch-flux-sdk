@@ -46,7 +46,7 @@ const wrapper = (WrappedComponent) => {
 		}
 
 		componentDidCatch(error, info) {
-			console.error(error);
+			console.error('wch-flux-sdk: Layout error', error);
 		}
 
 

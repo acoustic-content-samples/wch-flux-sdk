@@ -2,11 +2,18 @@
 Copyright IBM Corporation 2017.
 LICENSE: Apache License, Version 2.0
 */
+const dxSites = 'dxsites',
+	siteIdRegexStr = '[\\w\\d_\\-%]',
+	tenantIdRegexStr = `[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}`,
+	baseUrlRegex = new RegExp(`^(?:\\/api)?(?:\\/(${tenantIdRegexStr}))?(?:(?:\\/${dxSites}\\/)(${siteIdRegexStr}+))?(?:\\/)?(?:.*)$`);
 let
 	host = window.location.hostname,
-	tenant = window.location.pathname.split('/')[1],
 	protocol = window.location.protocol,
-	inPreview = (host.match(/-preview\.ibm\.com/)) || getQueryVariable('x-ibm-x-preview') === 'true';
+	[total, tenant, site] = baseUrlRegex.exec(document.location.pathname),
+	inPreview = (host.match(/-preview\.ibm\.com/)) || getQueryVariable('x-ibm-x-preview') === 'true',
+	baseUrl = '',
+	apiUrl = '';
+calculateUrls();
 
 window.WchSdk = {};
 
@@ -21,7 +28,7 @@ let subscriptions = {
 	site: []
 };
 
-console.log(`We are ${(inPreview) ? '' : 'NOT '}in Preview`);
+console.info(`wch-flux-sdk: We are ${(inPreview) ? '' : 'NOT '}in Preview`);
 
 if (inPreview) {
 	window.addEventListener('message', receiveMessage, false);
@@ -29,7 +36,7 @@ if (inPreview) {
 
 function receiveMessage (event) {
 	if (event.data.type !== 'WchSdk.router.activeRoute.subscribe') {
-		console.info('wch-flux-sdk', event.data);
+		console.info('wch-flux-sdk: Route event: ', event.data);
 	}
 
 	const action = event.data.type || event.data.action;
@@ -42,7 +49,7 @@ function receiveMessage (event) {
 				const id = event.data.id.split(':')[0];
 				loadContent(id, true);
 			} else {
-				loadSite('default', true);
+				loadSite(site, true);
 			}
 			break;
 		}
@@ -53,7 +60,7 @@ function receiveMessage (event) {
 			window.parent.postMessage({ type: 'WchSdk.router.activeRoute.subscribeResponse' }, event.origin);
 			break;
 		case 'inlineedit.pageChanged':
-			loadSite('default', true);
+			loadSite(site, true);
 			break;
 		default:
 			console.info('wch-flux-sdk: Unhandled event', event.data.type);
@@ -73,16 +80,14 @@ export function changeNavEvent (pageId) {
 		}, '*');
 }
 
-export function configWCH (hostname = window.location.hostname, tenantId = window.location.pathname.split('/')[1]) {
+export function configWCH (hostname = window.location.hostname, tenantId = window.location.pathname.split('/')[1], siteId) {
 	host = hostname;
 	tenant = tenantId;
+	if (siteId) {
+		site = siteId;
+	}
+	calculateUrls();
 	inPreview = (host.match(/-preview\.ibm\.com/)) || getQueryVariable('x-ibm-x-preview') === 'true';
-}
-
-export function configExternalSPA (hostname, tenantId) {
-	const indicator = hostname.includes('-stage') ? '-' : '.';
-	tenant = tenantId;
-	host = inPreview ? hostname.substring(0, hostname.indexOf(indicator)) + '-preview' + hostname.substring(hostname.indexOf(indicator)) : hostname;
 }
 
 export function getHost () {
@@ -91,6 +96,14 @@ export function getHost () {
 
 export function getTenant () {
 	return tenant;
+}
+
+export function getBaseUrl () {
+	return baseUrl;
+}
+
+export function getApiUrl () {
+	return apiUrl;
 }
 
 export function setNavChangeFunction (func) {
@@ -139,7 +152,7 @@ export function loadContent (id, force = false, onError) {
 	}
 
 	if (!contentPromises[id] || force) {
-		contentPromises[id] = fetch(`${protocol}//${host}/api/${tenant}/delivery/v1/rendering/context/${id}`, getRequestHeaders()).then(res => {
+		contentPromises[id] = fetch(`${apiUrl}/delivery/v1/rendering/context/${id}`, getRequestHeaders()).then(res => {
 			if (!res.ok && onError) {
 				onError(res.status, res.statusText);
 			}
@@ -180,7 +193,7 @@ export function loadContentDraft (id, force=false, onError) {
 	}
 
 	if (!contentPromises[id] || force) {
-		contentPromises[id] = fetch(`${protocol}//${host}/api/${tenant}/delivery/v1/rendering/context/${id}`, {
+		contentPromises[id] = fetch(`${apiUrl}/delivery/v1/rendering/context/${id}`, {
 			}).then(res => {
 				if (!res.ok && onError) {
 			onError(res.status, res.statusText);
@@ -202,7 +215,7 @@ export function loadContentDraft (id, force=false, onError) {
 			}
 		}
 		if(content.hasOwnProperty('kind') && content.kind[0] === 'page') {
-			loadSite('default', true);
+			loadSite(site, true);
 			return 'page';
 		}
 
@@ -223,20 +236,20 @@ function mapNav (pages) {
 				layoutId: pages[i].layoutId
 			}
 		});
-
 		if (pages[i].children && pages[i].children.length > 0) {
 			mapNav(pages[i].children);
 		}
 	}
 }
 
-export function loadSite (siteName = 'default', force = false) {
+export function loadSite (siteName, force = false) {
+	siteName = siteName ? siteName : site ? site : 'default';
 	if (!force && sitePromise && Object.keys(WchStore.site).length !== 0) {
 		return;
 	}
 
 	if (!sitePromise || force) {
-		sitePromise = fetch(`${protocol}//${host}/api/${tenant}/delivery/v1/rendering/sites/${siteName}`, getRequestHeaders()).then(res => res.json());
+		sitePromise = fetch(`${apiUrl}/delivery/v1/rendering/sites/${siteName}`, getRequestHeaders()).then(res => res.json());
 	}
 
 	sitePromise.then(site => {
@@ -269,14 +282,10 @@ export function getQueryString (type, rows) {
 	return `q=type:%22${type}%22&fq=classification:(content)&fq=isManaged:(%22true%22)&sort=lastModified desc&fl=document:%5Bjson%5D,lastModified&rows=${rows}`;
 }
 
-export function getAPIUrl () {
-	return `${protocol}//${host}/api/${tenant}/delivery/v1/`;
-}
-
 export function queryContent (type, rows) {
 
 	let searchQuery = getQueryString(type, rows);
-	fetch(`${protocol}//${host}/api/${tenant}/delivery/v1/rendering/search?${searchQuery}`, getRequestHeaders()).then(res => {
+	fetch(`${apiUrl}/delivery/v1/rendering/search?${searchQuery}`, getRequestHeaders()).then(res => {
 		res.json().then(results => {
 			if (results.numFound > 0) {
 				results.documents.map(item => item.document).forEach(item => {
@@ -393,4 +402,16 @@ function getQueryVariable (variable) {
 		if (pair[0] === variable) { return pair[1]; }
 	}
 	return (false);
+}
+
+function calculateUrls () {
+	baseUrl = tenant
+		? site
+			? `${tenant}/${dxSites}/${site}` // site and tenant
+			: `${tenant}` // just tenant
+		: site
+			? `${dxSites}/${site}` // just site
+			: ''; // no IDs
+	apiUrl = `${protocol}//${host}/api/${baseUrl}`;
+	console.info(`wch-flux-sdk: base url is "${baseUrl}"` + (tenant ? `, tenant id is "${tenant}"` : '') + (site ? `, site id is "${site}"` : ''));
 }

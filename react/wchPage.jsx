@@ -4,7 +4,7 @@ LICENSE: Apache License, Version 2.0
 */
 import React from 'react';
 import {changeNavEvent, loadContent, getContent, getRoute, subscribe, getPage} from '../'
-import {getComponentByName, getComponentByLayout} from './';
+import {getComponentByName, getComponentByLayout, ComponentIDRegistry} from './';
 import { SiteHeader } from '../../../src/components/siteHeader/siteHeader';
 import { SiteFooter } from '../../../src/components/siteFooter/siteFooter';
 import {WchContent} from "./wchContent";
@@ -41,7 +41,7 @@ export class WchPage extends React.Component {
 							status: '200',
 							contentId: route.contentId,
 							Component: <WchContent contentId={route.contentId}/>,
-                        	page: getPage(route.contentId) ? getPage(route.contentId): {}
+							page: getPage(route.contentId) ? getPage(route.contentId): {}
 						});
 					} else {
 						this._setErrorPage();
@@ -53,7 +53,7 @@ export class WchPage extends React.Component {
 							status: '200',
 							contentId: route.contentId,
 							Component: <WchContent contentId={route.contentId}/>,
-                        	page: getPage(route.contentId) ? getPage(route.contentId): {}
+							page: getPage(route.contentId) ? getPage(route.contentId): {}
 						});	
 					}).catch(err => {this._setErrorPage()})
 
@@ -61,7 +61,7 @@ export class WchPage extends React.Component {
 
 				}
 			} else {
-				console.error(`RRW Route not set`)
+				console.error('wch-flux-sdk: route not set');
 				this._setErrorPage();
 
 			}

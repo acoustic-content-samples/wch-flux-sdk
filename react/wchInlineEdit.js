@@ -1,4 +1,4 @@
-import { getAPIUrl } from '../index';
+import { getApiUrl } from '../index';
 const sitesInline = `inline-edit.js`;
 const configUrl = `rendering/config`;
 const modules = [];
@@ -27,7 +27,7 @@ export class WchInlineEdit {
 	}
 
 	handleClick(e) {
-		console.log('RAVE in service handleClick');
+		//console.log('RAVE in service handleClick');
 	}
 
 	registerComponent(nativeElement, accessor, onRenderingContext, contentId) {
@@ -117,7 +117,7 @@ export class WchInlineEdit {
 
 	getSiteConfig() {
 		return new Promise((resolve, reject) => {
-			fetch(`${getAPIUrl()}${configUrl}`, {
+			fetch(`${getApiUrl()}/delivery/v1/${configUrl}`, {
 				mode: 'cors',
 				responseType: 'application/json',
 				credentials: 'include'
