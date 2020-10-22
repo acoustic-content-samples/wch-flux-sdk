@@ -10,7 +10,7 @@ let
 	host = window.location.hostname,
 	protocol = window.location.protocol,
 	[total, tenant, site] = baseUrlRegex.exec(document.location.pathname),
-	inPreview = (host.match(/-preview\.ibm\.com/)) || getQueryVariable('x-ibm-x-preview') === 'true',
+	inPreview = (host.match(/-preview/)) || getQueryVariable('x-ibm-x-preview') === 'true',
 	baseUrl = '',
 	apiUrl = '';
 calculateUrls();
