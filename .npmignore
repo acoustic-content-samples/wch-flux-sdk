@@ -4,3 +4,6 @@
 wchtools-*.*
 *.conflict
 .wchtoolshashes
+.gitignore
+Jenkinsfile
+npm_publish.sh
