@@ -412,6 +412,12 @@ function calculateUrls () {
 		: site
 			? `${dxSites}/${site}` // just site
 			: ''; // no IDs
-	apiUrl = `${protocol}//${host}/api/${baseUrl}`;
-	console.info(`wch-flux-sdk: base url is "${baseUrl}"` + (tenant ? `, tenant id is "${tenant}"` : '') + (site ? `, site id is "${site}"` : ''));
+		// Check if the host contains -preview in the url if in preview mode
+		if (inPreview && apiUrl.indexOf('-preview') === -1) {
+			const hostDetails = host.split(".goacoustic.");
+			apiUrl = `${protocol}//${hostDetails[0]}-preview.goacoustic.com/api/${baseUrl}`
+		} else {
+			apiUrl = `${protocol}//${host}/api/${baseUrl}`;
+		}
+		console.info(`wch-flux-sdk: url is "${apiUrl}"` + (tenant ? `, tenant id is "${tenant}"` : '') + (site ? `, site id is "${site}"` : ''));
 }
