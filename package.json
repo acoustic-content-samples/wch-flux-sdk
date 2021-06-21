@@ -1,5 +1,5 @@
 {
-  "name": "wch-flux-sdk",
+  "name": "@acoustic-content-sdk/wch-flux-sdk",
   "version": "1.4.0",
   "description": "",
   "main": "index.js",
