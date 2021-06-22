@@ -1,6 +1,6 @@
 {
-  "name": "wch-flux-sdk",
-  "version": "1.4.0",
+  "name": "@acoustic-content-sdk/wch-flux-sdk",
+  "version": "1.5.0",
   "description": "",
   "main": "index.js",
   "scripts": {

@@ -5,8 +5,8 @@ LICENSE: Apache License, Version 2.0
 import React from 'react';
 import {changeNavEvent, loadContent, getContent, getRoute, subscribe, getPage} from '../'
 import {getComponentByName, getComponentByLayout, ComponentIDRegistry} from './';
-import { SiteHeader } from '../../../src/components/siteHeader/siteHeader';
-import { SiteFooter } from '../../../src/components/siteFooter/siteFooter';
+import { SiteHeader } from '../../../../src/components/siteHeader/siteHeader';
+import { SiteFooter } from '../../../../src/components/siteFooter/siteFooter';
 import {WchContent} from "./wchContent";
 
 export class WchPage extends React.Component {

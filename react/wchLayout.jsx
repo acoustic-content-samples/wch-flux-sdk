@@ -4,8 +4,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { loadContent, getContent, subscribe, isPreview } from 'wch-flux-sdk';
-import { getEditService } from 'wch-flux-sdk/react';
+import { loadContent, getContent, subscribe, isPreview } from '@acoustic-content-sdk/wch-flux-sdk';
+import { getEditService } from '@acoustic-content-sdk/wch-flux-sdk/react';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 const wrapper = (WrappedComponent) => {
